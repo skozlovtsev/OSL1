@@ -10,13 +10,13 @@ type FileWorker struct {
 
 type fileInfo struct{}
 
-func NewFileWorker(wd string) *FileWorker {
-	return &FileWorker{
+func NewFileWorker(wd string) FileWorker {
+	return FileWorker{
 		WD: wd,
 	}
 }
 
-func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
+func (w FileWorker) FileInfo(path string) (fileInfo, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -30,7 +30,7 @@ func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
 	}
 }
 
-func (w *FileWorker) Create(path string) error {
+func (w FileWorker) Create(path string) error {
 	f, err := os.Create(w.WD + path)
 
 	if err != nil {
@@ -42,7 +42,7 @@ func (w *FileWorker) Create(path string) error {
 	return nil
 }
 
-func (w *FileWorker) Write(path string, data []byte) (int, error) {
+func (w FileWorker) Write(path string, data []byte) (int, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func (w *FileWorker) Write(path string, data []byte) (int, error) {
 
 }
 
-func (w *FileWorker) Read(path string) ([]byte, error) {
+func (w FileWorker) Read(path string) ([]byte, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -69,6 +69,6 @@ func (w *FileWorker) Read(path string) ([]byte, error) {
 	return data, nil
 }
 
-func (w *FileWorker) Delete(path string) error {
+func (w FileWorker) Delete(path string) error {
 	return os.Remove(w.WD + path)
 }

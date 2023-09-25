@@ -4,6 +4,32 @@ import (
 	"github.com/rivo/tview"
 )
 
+type ConsoleView struct {
+	app        *tview.Application
+	fsWorker   iFSWorker
+	fileWorker iFileWorker
+	jsonWorker iJSONWorker
+	xmlWorker  iXMLWorker
+	zipWorker  iZipWorker
+}
+
+func NewConsoleView(app *tview.Application) *ConsoleView {
+	return &ConsoleView{
+		app: app,
+	}
+}
+
+func (c *ConsoleView) Run() error {
+	if err := c.app.SetRoot(list, true).EnableMouse(true).Run(); err != nil {
+		return err
+	}
+}
+
+type file struct {
+	Name string
+	Body []byte
+}
+
 type iFileWorker interface {
 	FileInfo(string)
 	Create(string) error
@@ -31,30 +57,9 @@ type iXMLWorker interface {
 }
 
 type iZipWorker interface {
-	Compress()
+	Compress(files []file) int
 	AddFile()
 	Info()
 	Decompress()
 	Delete()
-}
-
-type ConsoleView struct {
-	app        *tview.Application
-	fsWorker   iFSWorker
-	fileWorker iFileWorker
-	jsonWorker iJSONWorker
-	xmlWorker  iXMLWorker
-	zipWorker  iZipWorker
-}
-
-func NewConsoleView(app *tview.Application) *ConsoleView {
-	return &ConsoleView{
-		app: app,
-	}
-}
-
-func (c *ConsoleView) Run() error {
-	if err := c.app.SetRoot(list, true).EnableMouse(true).Run(); err != nil {
-		return err
-	}
 }
