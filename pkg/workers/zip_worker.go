@@ -15,37 +15,37 @@ func NewZipWorker(fw *FileWorker) ZipWorker {
 	}
 }
 
-func (w ZipWorker) Compress(archiveName string, files []file) (int, error) {
-	archive, err := os.Create(archiveName)
+func (w ZipWorker) Compress(archiveName string, files []file) error {
+
+	archive, err := os.Create(w.fw.WD + archiveName)
 
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	// Create a new zip archive.
 	zw := zip.NewWriter(archive)
 
-	var i int = 0
 	// Add some files to the archive.
 	for _, file := range files {
 		f, err := zw.Create(file.Name)
 		if err != nil {
-			return i, err
+			return err
 		}
 		_, err = f.Write([]byte(file.Body))
 		if err != nil {
-			return i, err
+			return err
 		}
-		i++
 	}
 
 	// Make sure to check the error on Close.
 	err = zw.Close()
+
 	if err != nil {
-		return -1, err
+		return err
 	}
 
-	return i, nil
+	return nil
 }
 
 func (w ZipWorker) AddFile(archiveName string, file string) error {}
@@ -53,7 +53,8 @@ func (w ZipWorker) AddFile(archiveName string, file string) error {}
 //func (w *ZipWorker) Info() {}
 
 func (w ZipWorker) Decompress(archiveName string) ([]file, error) {
-	r, err := zip.OpenReader(archiveName)
+
+	r, err := zip.OpenReader(w.fw.WD + archiveName)
 
 	if err != nil {
 		return nil, err

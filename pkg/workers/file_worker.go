@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"io/fs"
 	"os"
 )
 
@@ -16,21 +17,22 @@ func NewFileWorker(wd string) FileWorker {
 	}
 }
 
-func (w FileWorker) FileInfo(path string) (fileInfo, error) {
+func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
 		return fileInfo{}, err
 	}
 
-	finfo, err := f.Stat()
+	var finfo fs.FileInfo
+	finfo, err = f.Stat()
 
 	if err != nil {
 		return fileInfo{}, err
 	}
 }
 
-func (w FileWorker) Create(path string) error {
+func (w *FileWorker) Create(path string) error {
 	f, err := os.Create(w.WD + path)
 
 	if err != nil {
@@ -42,7 +44,7 @@ func (w FileWorker) Create(path string) error {
 	return nil
 }
 
-func (w FileWorker) Write(path string, data []byte) (int, error) {
+func (w *FileWorker) Write(path string, data []byte) (int, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -51,9 +53,10 @@ func (w FileWorker) Write(path string, data []byte) (int, error) {
 
 	defer f.Close()
 
+	return f.Write(data)
 }
 
-func (w FileWorker) Read(path string) ([]byte, error) {
+func (w *FileWorker) Read(path string) ([]byte, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -69,6 +72,6 @@ func (w FileWorker) Read(path string) ([]byte, error) {
 	return data, nil
 }
 
-func (w FileWorker) Delete(path string) error {
+func (w *FileWorker) Delete(path string) error {
 	return os.Remove(w.WD + path)
 }
