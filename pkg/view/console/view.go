@@ -7,12 +7,8 @@ import (
 	"osl1/pkg/workers"
 )
 
-func ShowData(data []byte, err error) error {
-	if err != nil {
-		return err
-	}
-	fmt.Print(data)
-	return nil
+func ShowData(data []byte) {
+	fmt.Println(string(data))
 }
 
 func Menu() error {
@@ -39,7 +35,7 @@ func Menu() error {
 		fmt.Printf("1. Create new file\n2. Write to file\n3. Read from file\n4. Delete file\n")
 		reader := bufio.NewReader(os.Stdin)
 		char, _, err := reader.ReadRune()
-		fmt.Print("Please choose number of operation: ")
+		fmt.Println("Please choose number of operation: ")
 
 		if err != nil {
 			return err
@@ -79,7 +75,7 @@ func Menu() error {
 		fmt.Printf("1. Create new JSON\n2. Write to JSON\n3. Read from JSON\n4. Delete JSON\n")
 		reader := bufio.NewReader(os.Stdin)
 		char, _, err := reader.ReadRune()
-		fmt.Print("Please choose number of operation: ")
+		fmt.Println("Please choose number of operation: ")
 
 		if err != nil {
 			return err
@@ -120,7 +116,7 @@ func Menu() error {
 		fmt.Printf("1. Create new XML\n2. Write to XML\n3. Read from XML\n4. Delete XML\n")
 		reader := bufio.NewReader(os.Stdin)
 		char, _, err := reader.ReadRune()
-		fmt.Print("Please choose number of operation: ")
+		fmt.Println("Please choose number of operation: ")
 
 		if err != nil {
 			return err
@@ -161,7 +157,7 @@ func Menu() error {
 		fmt.Printf("1. Create new archive\n2. Write to archive\n3. Decompress archive\n4. Delete archive\n")
 		reader := bufio.NewReader(os.Stdin)
 		char, _, err := reader.ReadRune()
-		fmt.Print("Please choose number of operation: ")
+		fmt.Println("Please choose number of operation: ")
 
 		if err != nil {
 			return err
@@ -212,8 +208,8 @@ func Menu() error {
 			reader := bufio.NewReader(os.Stdin)
 			name, _ := reader.ReadString('\n')
 			ZipWorker.Delete(name)
-			Menu()
 		}
+		Menu()
 	}
 
 	return nil
