@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"io/fs"
 	"os"
 )
 
@@ -9,15 +8,13 @@ type FileWorker struct {
 	WD string
 }
 
-type fileInfo struct{}
-
 func NewFileWorker(wd string) FileWorker {
 	return FileWorker{
 		WD: wd,
 	}
 }
 
-func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
+/* func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
 	f, err := os.Open(w.WD + path)
 
 	if err != nil {
@@ -30,7 +27,9 @@ func (w *FileWorker) FileInfo(path string) (fileInfo, error) {
 	if err != nil {
 		return fileInfo{}, err
 	}
-}
+
+	return fileInfo{}, nil
+} */
 
 func (w *FileWorker) Create(path string) error {
 	f, err := os.Create(w.WD + path)
@@ -75,3 +74,5 @@ func (w *FileWorker) Read(path string) ([]byte, error) {
 func (w *FileWorker) Delete(path string) error {
 	return os.Remove(w.WD + path)
 }
+
+type fileInfo struct{}

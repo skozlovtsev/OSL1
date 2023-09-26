@@ -2,6 +2,7 @@ package workers
 
 import (
 	"archive/zip"
+	"io"
 	"os"
 )
 
@@ -32,7 +33,7 @@ func (w ZipWorker) Compress(archiveName string, files []file) error {
 		if err != nil {
 			return err
 		}
-		_, err = f.Write([]byte(file.Body))
+		_, err = f.Write(file.Body)
 		if err != nil {
 			return err
 		}
@@ -48,7 +49,34 @@ func (w ZipWorker) Compress(archiveName string, files []file) error {
 	return nil
 }
 
-func (w ZipWorker) AddFile(archiveName string, file string) error {}
+func (w ZipWorker) AddFile(archiveName string, file file) error {
+
+	archive, err := os.Open(w.fw.WD + archiveName)
+
+	if err != nil {
+		return err
+	}
+
+	zw := zip.NewWriter(archive)
+
+	var f io.Writer
+
+	f, err = zw.Create(file.Name)
+
+	_, err = f.Write(file.Body)
+
+	if err != nil {
+		return err
+	}
+
+	err = zw.Close()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 //func (w *ZipWorker) Info() {}
 

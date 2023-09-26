@@ -1,9 +1,5 @@
 package workers
 
-import (
-	"encoding/json"
-)
-
 type JSONWorker struct {
 	fw *FileWorker
 }
@@ -14,11 +10,15 @@ func NewJSONWorker(fw *FileWorker) JSONWorker {
 	}
 }
 
-func (w JSONWorker) CreateFile() error {}
+func (w JSONWorker) CreateFile(path string) error {
+	return w.fw.Create(path)
+}
 
-func (w JSONWorker) CreateObject() error {}
+func (w JSONWorker) AddObject() error {
 
-func (w JSONWorker) Read(path string) (map[string]any, error) {
+}
+
+/* func (w JSONWorker) Read(path string) (map[string]any, error) {
 	v := make(map[string]any)
 
 	data, err := w.fw.Read(path)
@@ -34,6 +34,10 @@ func (w JSONWorker) Read(path string) (map[string]any, error) {
 	}
 
 	return v, nil
+} */
+
+func (w JSONWorker) Read(path string) ([]byte, error) {
+	return w.fw.Read(path)
 }
 
 func (w JSONWorker) Delete(path string) error {
