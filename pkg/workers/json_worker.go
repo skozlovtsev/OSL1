@@ -15,12 +15,14 @@ func NewJSONWorker(fw *FileWorker) JSONWorker {
 }
 
 func (w JSONWorker) CreateFile(path string) error {
+	w.fw.Create(path)
+
 	return w.fw.Create(path)
 }
 
 func (w JSONWorker) Write(path string, object []byte) error {
 
-	f, err := os.Open(path)
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 
 	if err != nil {
 		return err
