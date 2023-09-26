@@ -15,7 +15,9 @@ func DriveInfo() {
 	for _, p := range parts {
 		device := p.Mountpoint
 		s, _ := disk.Usage(device)
-
+		if s == nil {
+			break
+		}
 		if s.Total == 0 {
 			continue
 		}
