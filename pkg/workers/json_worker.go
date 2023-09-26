@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"encoding/json"
 	"os"
 )
 
@@ -22,18 +21,6 @@ func (w JSONWorker) CreateFile(path string) error {
 func (w JSONWorker) Write(path string, object []byte) error {
 
 	f, err := os.Open(path)
-
-	if err != nil {
-		return err
-	}
-
-	var data struct {
-		name string
-		age  int
-		sex  bool
-	}
-
-	err = json.Unmarshal(object, &data)
 
 	if err != nil {
 		return err
