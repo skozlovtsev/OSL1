@@ -61,7 +61,8 @@ func Menu() error {
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
-			ShowData(FileWorker.Read(data))
+			rdata, _ := FileWorker.Read(data)
+			ShowData(rdata)
 			Menu()
 		case '4':
 			println("Write file name")
@@ -102,7 +103,8 @@ func Menu() error {
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
-			ShowData(JSONWorker.Read(data))
+			rdata, _ := JSONWorker.Read(data)
+			ShowData(rdata)
 			Menu()
 		case '4':
 			println("Write file name")
@@ -143,7 +145,8 @@ func Menu() error {
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
-			ShowData(XMLWorker.Read(data))
+			rdata, _ := XMLWorker.Read(data)
+			ShowData(rdata)
 			Menu()
 		case '4':
 			println("Write file name")
