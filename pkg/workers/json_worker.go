@@ -1,5 +1,10 @@
 package workers
 
+import (
+	"encoding/json"
+	"os"
+)
+
 type JSONWorker struct {
 	fw *FileWorker
 }
@@ -14,8 +19,27 @@ func (w JSONWorker) CreateFile(path string) error {
 	return w.fw.Create(path)
 }
 
-func (w JSONWorker) AddObject() error {
+func (w JSONWorker) Write(path string, object struct{}) error {
 
+	f, err := os.Open(path)
+
+	if err != nil {
+		return err
+	}
+
+	var data []byte
+
+	data, err = json.Marshal(object)
+
+	if err != nil {
+		return err
+	}
+
+	stat, _ := f.Stat()
+
+	_, err = f.WriteAt(data, stat.Size()-1)
+
+	return err
 }
 
 /* func (w JSONWorker) Read(path string) (map[string]any, error) {

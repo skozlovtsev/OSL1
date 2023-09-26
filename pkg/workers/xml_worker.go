@@ -14,7 +14,9 @@ func (w XMLWorker) CreateFile(path string) error {
 	return w.fw.Create(path)
 }
 
-func (w XMLWorker) AddData() {}
+func (w XMLWorker) Write(path string, data []byte) {
+
+}
 
 func (w XMLWorker) Read(path string) ([]byte, error) {
 	return w.fw.Read(path)
