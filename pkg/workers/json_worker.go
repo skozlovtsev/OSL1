@@ -19,7 +19,7 @@ func (w JSONWorker) CreateFile(path string) error {
 	return w.fw.Create(path)
 }
 
-func (w JSONWorker) Write(path string, object struct{}) error {
+func (w JSONWorker) Write(path string, object []byte) error {
 
 	f, err := os.Open(path)
 
@@ -27,9 +27,13 @@ func (w JSONWorker) Write(path string, object struct{}) error {
 		return err
 	}
 
-	var data []byte
+	var data struct {
+		name string
+		age  int
+		sex  bool
+	}
 
-	data, err = json.Marshal(object)
+	err = json.Unmarshal(object, &data)
 
 	if err != nil {
 		return err
@@ -37,7 +41,7 @@ func (w JSONWorker) Write(path string, object struct{}) error {
 
 	stat, _ := f.Stat()
 
-	_, err = f.WriteAt(data, stat.Size()-1)
+	_, err = f.WriteAt(object, stat.Size()-1)
 
 	return err
 }

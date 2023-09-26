@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"osl1/pkg/workers"
-
-	"github.com/skozlovtsev/OSL1/pkg/workers"
 )
 
 type ConsoleView struct {
@@ -37,6 +35,8 @@ func Menu() error {
 
 	wd, _ := os.Getwd()
 	FileWorker := workers.NewFileWorker(wd)
+	JSONWorker := workers.NewJSONWorker(&FileWorker)
+	XMLWorker := workers.NewXMLWorker(&FileWorker)
 
 	switch char {
 	case '1':
@@ -94,22 +94,27 @@ func Menu() error {
 		case '1':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			workers.JsonWorker.CreateFile(reader.ReadLine())
+			data, _ := reader.ReadString('\n')
+			JSONWorker.CreateFile(data)
 		case '2':
 			println("Write file name")
 			name_reader := bufio.NewReader(os.Stdin)
+			name, _ := name_reader.ReadString('\n')
 			println("Write text")
 			data_reader := bufio.NewReader(os.Stdin)
-			workers.JsonWorker.Write(name_reader.ReadLine(), data_reader.ReadLine())
+			data, _ := data_reader.ReadBytes('\n')
+			JSONWorker.Write(name, data)
 
 		case '3':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			ShowData(workers.JsonWorker.Read(reader.ReadLine()), nil)
+			data, _ := reader.ReadString('\n')
+			ShowData(JSONWorker.Read(data))
 		case '4':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			workers.JsonWorker.Delete(reader.ReadLine())
+			data, _ := reader.ReadString('\n')
+			JSONWorker.Delete(data)
 		}
 
 	case '4':
@@ -126,26 +131,33 @@ func Menu() error {
 		case '1':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			workers.XMLWorker.CreateFile(reader.ReadLine())
+			data, _ := reader.ReadString('\n')
+			XMLWorker.CreateFile(data)
 		case '2':
 			println("Write file name")
 			name_reader := bufio.NewReader(os.Stdin)
+			name, _ := name_reader.ReadString('\n')
 			println("Write text")
 			data_reader := bufio.NewReader(os.Stdin)
-			workers.XMLWorker.Write(name_reader.ReadLine(), data_reader.ReadLine())
+			data, _ := data_reader.ReadBytes('\n')
+			XMLWorker.Write(name, data)
 
 		case '3':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			ShowData(workers.XMLWorker.Read(reader.ReadLine()), nil)
+			data, _ := reader.ReadString('\n')
+			ShowData(XMLWorker.Read(data))
 		case '4':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
-			workers.XMLWorker.Delete(reader.ReadLine())
+			data, _ := reader.ReadString('\n')
+			XMLWorker.Delete(data)
 		}
 
 	case '5':
 	}
+
+	return nil
 }
 
 type file struct {
