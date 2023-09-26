@@ -7,14 +7,6 @@ import (
 	"osl1/pkg/workers"
 )
 
-type ConsoleView struct {
-	fsWorker   iFSWorker
-	fileWorker iFileWorker
-	jsonWorker iJSONWorker
-	xmlWorker  iXMLWorker
-	zipWorker  iZipWorker
-}
-
 func ShowData(data []byte, err error) error {
 	if err != nil {
 		return err
@@ -37,10 +29,12 @@ func Menu() error {
 	FileWorker := workers.NewFileWorker(wd)
 	JSONWorker := workers.NewJSONWorker(&FileWorker)
 	XMLWorker := workers.NewXMLWorker(&FileWorker)
+	ZipWorker := workers.NewZipWorker(&FileWorker)
 
 	switch char {
 	case '1':
 		workers.DriveInfo()
+		Menu()
 	case '2':
 		fmt.Printf("1. Create new file\n2. Write to file\n3. Read from file\n4. Delete file\n")
 		reader := bufio.NewReader(os.Stdin)
@@ -57,7 +51,7 @@ func Menu() error {
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			FileWorker.Create(data)
-
+			Menu()
 		case '2':
 			println("Write file name")
 			name_reader := bufio.NewReader(os.Stdin)
@@ -66,18 +60,19 @@ func Menu() error {
 			data_reader := bufio.NewReader(os.Stdin)
 			data, _ := data_reader.ReadBytes('\n')
 			FileWorker.Write(name, data)
-
+			Menu()
 		case '3':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			ShowData(FileWorker.Read(data))
-
+			Menu()
 		case '4':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			FileWorker.Delete(data)
+			Menu()
 		}
 
 	case '3':
@@ -96,6 +91,7 @@ func Menu() error {
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			JSONWorker.CreateFile(data)
+			Menu()
 		case '2':
 			println("Write file name")
 			name_reader := bufio.NewReader(os.Stdin)
@@ -104,17 +100,20 @@ func Menu() error {
 			data_reader := bufio.NewReader(os.Stdin)
 			data, _ := data_reader.ReadBytes('\n')
 			JSONWorker.Write(name, data)
+			Menu()
 
 		case '3':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			ShowData(JSONWorker.Read(data))
+			Menu()
 		case '4':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			JSONWorker.Delete(data)
+			Menu()
 		}
 
 	case '4':
@@ -133,6 +132,7 @@ func Menu() error {
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			XMLWorker.CreateFile(data)
+			Menu()
 		case '2':
 			println("Write file name")
 			name_reader := bufio.NewReader(os.Stdin)
@@ -141,60 +141,80 @@ func Menu() error {
 			data_reader := bufio.NewReader(os.Stdin)
 			data, _ := data_reader.ReadBytes('\n')
 			XMLWorker.Write(name, data)
+			Menu()
 
 		case '3':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			ShowData(XMLWorker.Read(data))
+			Menu()
 		case '4':
 			println("Write file name")
 			reader := bufio.NewReader(os.Stdin)
 			data, _ := reader.ReadString('\n')
 			XMLWorker.Delete(data)
+			Menu()
 		}
 
 	case '5':
+		fmt.Printf("1. Create new archive\n2. Write to archive\n3. Decompress archive\n4. Delete archive\n")
+		reader := bufio.NewReader(os.Stdin)
+		char, _, err := reader.ReadRune()
+		fmt.Print("Please choose number of operation: ")
+
+		if err != nil {
+			return err
+		}
+		switch char {
+		case '1':
+			println("Write archive name")
+			reader := bufio.NewReader(os.Stdin)
+			name, _ := reader.ReadString('\n')
+			var NFile []workers.File
+			for {
+				println("Write file name")
+				reader := bufio.NewReader(os.Stdin)
+				fName, _ := reader.ReadString('\n')
+				if fName == "0" {
+					break
+				}
+				fileBody, _ := FileWorker.Read(fName)
+				NFile = append(NFile, workers.File{Name: name, Body: fileBody})
+			}
+			ZipWorker.Compress(name, NFile)
+		case '2':
+			println("Write archive name")
+			reader := bufio.NewReader(os.Stdin)
+			name, _ := reader.ReadString('\n')
+			var NFile workers.File
+			println("Write file name")
+			freader := bufio.NewReader(os.Stdin)
+			fName, _ := freader.ReadString('\n')
+			if fName == "0" {
+				break
+			}
+			fileBody, _ := FileWorker.Read(fName)
+			NFile = workers.File{Name: name, Body: fileBody}
+
+			ZipWorker.AddFile(name, NFile)
+		case '3':
+			println("Write archive name")
+			reader := bufio.NewReader(os.Stdin)
+			name, _ := reader.ReadString('\n')
+			Data, _ := ZipWorker.Decompress(name)
+			for _, v := range Data {
+				FileWorker.Create(v.Name)
+				FileWorker.Write(v.Name, v.Body)
+			}
+		case '4':
+			println("Write archive name")
+			reader := bufio.NewReader(os.Stdin)
+			name, _ := reader.ReadString('\n')
+			ZipWorker.Delete(name)
+			Menu()
+		}
 	}
 
 	return nil
-}
-
-type file struct {
-	Name string
-	Body []byte
-}
-
-type iFileWorker interface {
-	FileInfo(string)
-	Create(string) error
-	Write(string, []byte) (int, error)
-	Read(string) ([]byte, error)
-	Delete(string) error
-}
-
-type iFSWorker interface {
-	DriveInfo(string)
-}
-
-type iJSONWorker interface {
-	CreateFile() error
-	CreateObject() error
-	Read(string) (map[string]any, error)
-	Delete(string) error
-}
-
-type iXMLWorker interface {
-	CreateFile(string) error
-	AddData(string, []byte) (int, error)
-	Read(string) ([]byte, error)
-	Delete(string) error
-}
-
-type iZipWorker interface {
-	Compress(files []file) int
-	AddFile()
-	Info()
-	Decompress()
-	Delete()
 }
