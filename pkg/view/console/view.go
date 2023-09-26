@@ -40,7 +40,7 @@ func Menu() error {
 
 	switch char {
 	case '1':
-		//workers.NewFSWorker(????).DriveInfo()
+		workers.DriveInfo()
 	case '2':
 		fmt.Printf("1. Create new file\n2. Write to file\n3. Read from file\n4. Delete file\n")
 		reader := bufio.NewReader(os.Stdin)

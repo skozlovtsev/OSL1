@@ -1,39 +1,34 @@
 package workers
 
 import (
-	"syscall"
+	"fmt"
+
+	human "github.com/dustin/go-humanize"
+	"github.com/shirou/gopsutil/disk"
 )
 
-type FSWorker struct {
-	Volume string
-	fs     syscall.Statfs_t
-}
+func DriveInfo() {
+	formatter := "%-14s %7s %7s %7s %4s %s\n"
+	fmt.Printf(formatter, "Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on")
 
-type driveInfo struct {
-	Type      int64
-	TotalSize uint64
-	FreeSpace uint64
-	Volume    string // ???
-}
+	parts, _ := disk.Partitions(true)
+	for _, p := range parts {
+		device := p.Mountpoint
+		s, _ := disk.Usage(device)
 
-func NewFSWorker(volume string) *FSWorker {
-	fs := syscall.Statfs_t{}
-	err := syscall.Statfs(volume, &fs)
+		if s.Total == 0 {
+			continue
+		}
 
-	if err != nil {
-		return nil
+		percent := fmt.Sprintf("%2.f%%", s.UsedPercent)
+
+		fmt.Printf(formatter,
+			s.Fstype,
+			human.Bytes(s.Total),
+			human.Bytes(s.Used),
+			human.Bytes(s.Free),
+			percent,
+			p.Mountpoint,
+		)
 	}
-
-	return &FSWorker{
-		Volume: volume,
-	}
-}
-
-func (w *FSWorker) DriveInfo() driveInfo {
-	drive := driveInfo{}
-	drive.Type = w.fs.Type
-	drive.TotalSize = w.fs.Blocks * uint64(w.fs.Bsize)
-	drive.FreeSpace = w.fs.Bfree * uint64(w.fs.Bsize)
-
-	return drive
 }
