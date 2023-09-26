@@ -16,7 +16,7 @@ func NewZipWorker(fw *FileWorker) ZipWorker {
 	}
 }
 
-func (w ZipWorker) Compress(archiveName string, files []file) error {
+func (w ZipWorker) Compress(archiveName string, files []File) error {
 
 	archive, err := os.Create(w.fw.WD + archiveName)
 
@@ -49,7 +49,7 @@ func (w ZipWorker) Compress(archiveName string, files []file) error {
 	return nil
 }
 
-func (w ZipWorker) AddFile(archiveName string, file file) error {
+func (w ZipWorker) AddFile(archiveName string, file File) error {
 
 	archive, err := os.Open(w.fw.WD + archiveName)
 
@@ -80,7 +80,7 @@ func (w ZipWorker) AddFile(archiveName string, file file) error {
 
 //func (w *ZipWorker) Info() {}
 
-func (w ZipWorker) Decompress(archiveName string) ([]file, error) {
+func (w ZipWorker) Decompress(archiveName string) ([]File, error) {
 
 	r, err := zip.OpenReader(w.fw.WD + archiveName)
 
@@ -90,7 +90,7 @@ func (w ZipWorker) Decompress(archiveName string) ([]file, error) {
 
 	defer r.Close()
 
-	var files []file
+	var files []File
 
 	for _, f := range r.File {
 		rc, err := f.Open()
@@ -107,7 +107,7 @@ func (w ZipWorker) Decompress(archiveName string) ([]file, error) {
 			return nil, err
 		}
 
-		files = append(files, file{Name: f.Name, Body: buf})
+		files = append(files, File{Name: f.Name, Body: buf})
 
 		rc.Close()
 	}
@@ -119,7 +119,7 @@ func (w ZipWorker) Delete(archiveName string) error {
 	return w.fw.Delete(archiveName)
 }
 
-type file struct {
+type File struct {
 	Name string
 	Body []byte
 }
