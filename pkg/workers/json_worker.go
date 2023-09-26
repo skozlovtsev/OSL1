@@ -26,6 +26,8 @@ func (w JSONWorker) Write(path string, object []byte) error {
 		return err
 	}
 
+	defer f.Close()
+
 	stat, _ := f.Stat()
 
 	_, err = f.WriteAt(object, stat.Size()-1)

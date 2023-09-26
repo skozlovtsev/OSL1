@@ -42,6 +42,8 @@ func (w ZipWorker) Compress(archiveName string, files []File) error {
 	// Make sure to check the error on Close.
 	err = zw.Close()
 
+	archive.Close()
+
 	if err != nil {
 		return err
 	}
@@ -63,6 +65,10 @@ func (w ZipWorker) AddFile(archiveName string, file File) error {
 
 	f, err = zw.Create(file.Name)
 
+	if err != nil {
+		return err
+	}
+
 	_, err = f.Write(file.Body)
 
 	if err != nil {
@@ -70,6 +76,8 @@ func (w ZipWorker) AddFile(archiveName string, file File) error {
 	}
 
 	err = zw.Close()
+
+	archive.Close()
 
 	if err != nil {
 		return err
@@ -111,6 +119,7 @@ func (w ZipWorker) Decompress(archiveName string) ([]File, error) {
 
 		rc.Close()
 	}
+	r.Close()
 
 	return files, nil
 }

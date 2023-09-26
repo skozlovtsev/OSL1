@@ -10,7 +10,7 @@ type FileWorker struct {
 
 func NewFileWorker(wd string) FileWorker {
 	return FileWorker{
-		WD: wd,
+		WD: wd + "/",
 	}
 }
 
@@ -43,36 +43,16 @@ func (w *FileWorker) Create(path string) error {
 	return nil
 }
 
-func (w *FileWorker) Write(path string, data []byte) (int, error) {
-	f, err := os.Open(w.WD + path)
+func (w *FileWorker) Write(path string, data []byte) error {
 
-	if err != nil {
-		return 0, err
-	}
-
-	defer f.Close()
-
-	return f.Write(data)
+	return os.WriteFile(w.WD+path, data, 0666)
 }
 
 func (w *FileWorker) Read(path string) ([]byte, error) {
-	f, err := os.Open(w.WD + path)
 
-	if err != nil {
-		return nil, err
-	}
-
-	defer f.Close()
-
-	var data []byte
-
-	f.Read(data)
-
-	return data, nil
+	return os.ReadFile(w.WD + path)
 }
 
 func (w *FileWorker) Delete(path string) error {
 	return os.Remove(w.WD + path)
 }
-
-type fileInfo struct{}
