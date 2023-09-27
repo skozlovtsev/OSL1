@@ -16,6 +16,7 @@ func NewZipWorker(fw *FileWorker) ZipWorker {
 	}
 }
 
+// Cereate Zip archive and add files to it
 func (w ZipWorker) Compress(archiveName string, files []File) error {
 
 	archive, err := os.Create(w.fw.WD + archiveName)
@@ -51,6 +52,7 @@ func (w ZipWorker) Compress(archiveName string, files []File) error {
 	return nil
 }
 
+// Add File to the archive
 func (w ZipWorker) AddFile(archiveName string, file File) error {
 
 	archive, err := os.Open(w.fw.WD + archiveName)
@@ -88,6 +90,7 @@ func (w ZipWorker) AddFile(archiveName string, file File) error {
 
 //func (w *ZipWorker) Info() {}
 
+// Decompress files from the zip archive
 func (w ZipWorker) Decompress(archiveName string) ([]File, error) {
 
 	r, err := zip.OpenReader(w.fw.WD + archiveName)
@@ -124,10 +127,12 @@ func (w ZipWorker) Decompress(archiveName string) ([]File, error) {
 	return files, nil
 }
 
+// Delete aerchive file
 func (w ZipWorker) Delete(archiveName string) error {
 	return w.fw.Delete(archiveName)
 }
 
+// Structure representing file
 type File struct {
 	Name string
 	Body []byte
