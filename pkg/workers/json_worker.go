@@ -14,7 +14,7 @@ func NewJSONWorker(fw *FileWorker) JSONWorker {
 	}
 }
 
-func (w JSONWorker) CreateFile(path string) error {
+func (w JSONWorker) Create(path string) error {
 	w.fw.Create(path)
 
 	return w.fw.Create(path)

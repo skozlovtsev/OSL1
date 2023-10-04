@@ -10,7 +10,7 @@ func NewXMLWorker(fw *FileWorker) XMLWorker {
 	}
 }
 
-func (w XMLWorker) CreateFile(path string) error {
+func (w XMLWorker) Create(path string) error {
 	return w.fw.Create(path)
 }
 

@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	panic(console.Menu())
+	panic(console.MainMenu())
 }
