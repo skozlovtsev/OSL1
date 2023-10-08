@@ -31,7 +31,6 @@ func NewFileWorker(wd string) *FileWorker {
 	return fileInfo{}, nil
 } */
 
-// Create new file
 func (w *FileWorker) Create(path string) error {
 	f, err := os.Create(w.WD + path)
 
@@ -44,19 +43,16 @@ func (w *FileWorker) Create(path string) error {
 	return nil
 }
 
-// Write data in file
 func (w *FileWorker) Write(path string, data []byte) error {
 
 	return os.WriteFile(w.WD+path, data, 0666)
 }
 
-// Read data from file
 func (w *FileWorker) Read(path string) ([]byte, error) {
 
 	return os.ReadFile(w.WD + path)
 }
 
-// Delete file
 func (w *FileWorker) Delete(path string) error {
 	return os.Remove(w.WD + path)
 }
