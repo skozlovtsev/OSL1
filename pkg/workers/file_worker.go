@@ -47,7 +47,17 @@ func (w *FileWorker) Create(path string) error {
 // Write data in file
 func (w *FileWorker) Write(path string, data []byte) error {
 
-	return os.WriteFile(w.WD+path, data, 0666)
+	f, err := os.OpenFile(w.WD+path, os.O_APPEND|os.O_WRONLY, 0)
+
+	if err != nil {
+		return err
+	}
+
+	f.WriteString(string(data))
+
+	f.Close()
+
+	return err
 }
 
 // Read data from file
