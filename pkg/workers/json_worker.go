@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"encoding/json"
 	"os"
 )
 
@@ -20,7 +21,7 @@ func (w JSONWorker) Create(path string) error {
 	return w.fw.Create(path)
 }
 
-func (w JSONWorker) Write(path string, object []byte) error {
+func (w JSONWorker) Write(path string, data map[string]string) error {
 
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 
@@ -30,9 +31,9 @@ func (w JSONWorker) Write(path string, object []byte) error {
 
 	defer f.Close()
 
-	stat, _ := f.Stat()
+	content, err := json.Marshal(data)
 
-	_, err = f.WriteAt(object, stat.Size()-1)
+	f.Write(content)
 
 	return err
 }
@@ -55,8 +56,15 @@ func (w JSONWorker) Write(path string, object []byte) error {
 	return v, nil
 } */
 
-func (w JSONWorker) Read(path string) ([]byte, error) {
-	return w.fw.Read(path)
+func (w JSONWorker) Read(path string) (map[string]string, error) {
+
+	content := make(map[string]string)
+
+	data, _ := w.fw.Read(path)
+
+	err := json.Unmarshal(data, &content)
+
+	return content, err
 }
 
 func (w JSONWorker) Delete(path string) error {
