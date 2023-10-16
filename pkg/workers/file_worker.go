@@ -53,7 +53,7 @@ func (w *FileWorker) Write(path string, data []byte) error {
 		return err
 	}
 
-	f.WriteString(string(data))
+	f.Write(data)
 
 	f.Close()
 
