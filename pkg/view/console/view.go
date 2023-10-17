@@ -2,9 +2,11 @@ package console
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"osl1/pkg/workers"
+	"time"
 
 	ansi "github.com/bit101/go-ansi"
 	tty "github.com/mattn/go-tty"
@@ -48,36 +50,54 @@ func showData(data []byte) {
 
 func MainMenu() error {
 
+	const ops = 5
+
+	var mainMenuOp int
+
 	ansi.ClearScreen()
 
 	for {
 		ansi.Println(ansi.Cyan, fileWorker.WD)
 		ansi.Print(ansi.Yellow, "|  0. <--..\n")
 		fmt.Print("|  1. Show drive Info\n|  2. Operations with files\n|  3. Operations with JSON\n|  4. Operations with XML\n|  5. Operations with ZIP\n")
+		fmt.Println(mainMenuOp)
 
-		char, _ := readByte()
+		r, _ := readKeyRuneTTY()
 
-		switch char {
-		case '0':
-			return nil
-		case '1':
-			workers.DriveInfo()
-			continue
-		case '2':
-			fileMenu()
-			ansi.ClearScreen()
-		case '3':
-			jsonMenu()
-			ansi.ClearScreen()
-		case '4':
-			xmlMenu()
-			ansi.ClearScreen()
-		case '5':
-			zipMenu()
-			ansi.ClearScreen()
+		switch r {
 		default:
-			ansi.ClearLine()
-			ansi.Print(ansi.Red, "Wrong operation. ")
+			continue
+		case 'w': // Up Arrow
+			if mainMenuOp > 0 {
+				mainMenuOp -= 1
+			}
+		case 's': // Down Arrow
+			if mainMenuOp < ops {
+				mainMenuOp += 1
+			}
+		case 13: // Enter
+			switch mainMenuOp {
+			case 0:
+				return nil
+			case 1:
+				workers.DriveInfo()
+				continue
+			case 2:
+				fileMenu()
+				ansi.ClearScreen()
+			case 3:
+				jsonMenu()
+				ansi.ClearScreen()
+			case 4:
+				xmlMenu()
+				ansi.ClearScreen()
+			case 5:
+				zipMenu()
+				ansi.ClearScreen()
+			default:
+				ansi.ClearLine()
+				ansi.Print(ansi.Red, "Wrong operation. ")
+			}
 		}
 	}
 }
@@ -99,7 +119,15 @@ func fileMenu() error {
 			name, _ := readFileNameTTY(txtPostfix)
 			return fileWorker.Create(name)
 		case '2':
+			path, _ := readFileNameTTY(txtPostfix)
+			data, _ := readString()
+			return fileWorker.Write(path, []byte(data))
 		case '3':
+			path, _ := readFileNameTTY(txtPostfix)
+			data, err := fileWorker.Read(path)
+			fmt.Println(string(data))
+			time.Sleep(time.Second * 10)
+			return err
 		case '4':
 			name, _ := readFileName(txtPostfix)
 			return fileWorker.Delete(name)
@@ -126,7 +154,39 @@ func jsonMenu() error {
 			name, _ := readFileName(jsonPostfix)
 			return jsonWorker.Create(name)
 		case '2':
+			path, _ := readFileNameTTY(jsonPostfix)
+			var data map[string]string
+
+			for {
+				k, err := readStringTTY()
+				if err != nil {
+					jsonWorker.Write(path, data)
+				}
+
+				fmt.Print(" : ")
+
+				var v string
+
+				v, err = readStringTTY()
+
+				if err != nil {
+					jsonWorker.Write(path, data)
+				}
+
+				data[k] = v
+			}
 		case '3':
+			path, _ := readFileNameTTY(jsonPostfix)
+			data, err := jsonWorker.Read(path)
+
+			if err != nil {
+				fmt.Println(err.Error())
+				return err
+			}
+
+			for k, v := range data {
+				fmt.Printf("\n%s: %s", k, v)
+			}
 		case '4':
 			name, _ := readFileName(jsonPostfix)
 			return jsonWorker.Delete(name)
@@ -153,7 +213,42 @@ func xmlMenu() error {
 			name, _ := readFileName(xmlPostfix)
 			return xmlWorker.Create(name)
 		case '2':
+			path, _ := readFileNameTTY(xmlPostfix)
+			var data workers.XMLFile = workers.XMLFile{}
+
+			for {
+				k, err := readStringTTY()
+				if err != nil {
+					xmlWorker.Write(path, data)
+				}
+
+				fmt.Print(" : ")
+
+				var v string
+
+				v, err = readStringTTY()
+
+				if err != nil {
+					xmlWorker.Write(path, data)
+				}
+
+				data.Object = append(data.Object, struct {
+					Id   string
+					Text string
+				}{k, v})
+			}
 		case '3':
+			path, _ := readFileNameTTY(xmlPostfix)
+			data, err := xmlWorker.Read(path)
+
+			if err != nil {
+				fmt.Println(err.Error())
+				return err
+			}
+
+			for _, obj := range data.Object {
+				fmt.Printf("\n%s: %s", obj.Id, obj.Text)
+			}
 		case '4':
 			name, _ := readFileName(xmlPostfix)
 			return xmlWorker.Delete(name)
@@ -255,6 +350,66 @@ func readFileName(formatPostfix string) (string, error) {
 	return name + formatPostfix, err
 }
 
+func readKeyRuneTTY() (rune, error) {
+	tty, err := tty.Open()
+	if err != nil {
+		return '0', err
+	}
+	defer tty.Close()
+
+	return tty.ReadRune()
+}
+
+func readStringTTY() (string, error) {
+	tty, err := tty.Open()
+	if err != nil {
+		return "", err
+	}
+	defer tty.Close()
+
+	var s string
+
+	for {
+		r, err := tty.ReadRune()
+		if err != nil {
+			return "", err
+		}
+
+		// handle key event
+		switch {
+		case r == 27: //ESC
+			return "", errors.New("ESC character: end of input")
+		case r == 13: //Enter
+			return s, nil
+		case r == 127 || r == 8: //Backspace
+			if len(s) >= 1 {
+				s = s[:len(s)-1]
+			}
+
+			ansi.ClearLine()
+
+			ansi.SetReversed(true)
+			fmt.Print(s)
+
+			ansi.SetReversed(false)
+
+			ansi.MoveLeft(1)
+
+		case 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9':
+			s += string(r)
+
+			ansi.ClearLine()
+
+			ansi.SetReversed(true)
+			fmt.Print(s)
+
+			ansi.SetReversed(false)
+
+			ansi.MoveLeft(1) // !
+		}
+	}
+}
+
 func readFileNameTTY(formatPostfix string) (string, error) {
 	tty, err := tty.Open()
 	if err != nil {
@@ -266,7 +421,7 @@ func readFileNameTTY(formatPostfix string) (string, error) {
 
 	ansi.MoveLeft(len(formatPostfix) + 1)
 
-	s := ""
+	var s string
 
 	for {
 		r, err := tty.ReadRune()
@@ -276,9 +431,9 @@ func readFileNameTTY(formatPostfix string) (string, error) {
 
 		// handle key event
 		switch {
-		case r == 13:
+		case r == 13: //Enter
 			return s + formatPostfix, nil
-		case r == 127:
+		case r == 127 || r == 8: //Backspace
 			if len(s) >= 1 {
 				s = s[:len(s)-1]
 			}
@@ -311,7 +466,7 @@ func readFileNameTTY(formatPostfix string) (string, error) {
 			ansi.SetReversed(false)
 			fmt.Print(formatPostfix)
 
-			ansi.MoveLeft(len(formatPostfix) + 1)
+			ansi.MoveLeft(len(formatPostfix) + 1) // !
 		}
 	}
 }
