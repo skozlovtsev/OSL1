@@ -9,6 +9,14 @@ type XMLWorker struct {
 	fw *FileWorker
 }
 
+type XMLFile struct {
+	XMLName xml.Name `xml:"Name"`
+	Object  []struct {
+		Id   string
+		Text string
+	} `xml:"object"`
+}
+
 func NewXMLWorker(fw *FileWorker) XMLWorker {
 	return XMLWorker{
 		fw: fw,
@@ -19,7 +27,7 @@ func (w XMLWorker) Create(path string) error {
 	return w.fw.Create(path)
 }
 
-func (w XMLWorker) Write(path string, data map[string]string) error {
+func (w XMLWorker) Write(path string, data XMLFile) error {
 
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 
@@ -29,22 +37,22 @@ func (w XMLWorker) Write(path string, data map[string]string) error {
 
 	defer f.Close()
 
-	content, err := xml.Marshal(data)
+	content, err := xml.MarshalIndent(data, " ", "  ")
 
 	f.Write(content)
 
 	return err
 }
 
-func (w XMLWorker) Read(path string) (map[string]string, error) {
+func (w XMLWorker) Read(path string) (XMLFile, error) {
 
-	content := make(map[string]string)
+	content := new(XMLFile)
 
 	data, _ := w.fw.Read(path)
 
 	err := xml.Unmarshal(data, &content)
 
-	return content, err
+	return *content, err
 }
 
 func (w XMLWorker) Delete(path string) error {
