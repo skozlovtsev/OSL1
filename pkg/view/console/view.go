@@ -155,7 +155,7 @@ func jsonMenu() error {
 			return jsonWorker.Create(name)
 		case '2':
 			path, _ := readFileNameTTY(jsonPostfix)
-			var data map[string]string
+			var data map[string]string = make(map[string]string)
 
 			for {
 				k, err := readStringTTY()
