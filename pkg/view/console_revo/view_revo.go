@@ -51,44 +51,44 @@ func init() {
 	zipWorker = workers.NewZipWorker(fileWorker)
 
 	MainMenu = &Menu{Options: []Option{
-		{"<--..", func() {}},
-		{"Show drive Info", func() {}},
-		{"Operations with files", func() {}},
-		{"Operations with JSON", func() {}},
-		{"Operations with XML", func() {}},
-		{"Operations with ZI", func() {}},
+		{"<--..", func() {}, true},
+		{"Show drive Info", func() {}, false},
+		{"Operations with files", func() {}, false},
+		{"Operations with JSON", func() {}, false},
+		{"Operations with XML", func() {}, false},
+		{"Operations with ZI", func() {}, false},
 	}}
 
 	fileMenu = &Menu{Options: []Option{
-		{"<--..", func() {}},
-		{"Create new file", func() {}},
-		{"Write to file", func() {}},
-		{"Read from file", func() {}},
-		{"Delete file", func() {}},
+		{"<--..", func() {}, true},
+		{"Create new file", func() {}, false},
+		{"Write to file", func() {}, false},
+		{"Read from file", func() {}, false},
+		{"Delete file", func() {}, false},
 	}}
 
 	jsonMenu = &Menu{Options: []Option{
-		{"<--..", func() {}},
-		{"Create new JSON", func() {}},
-		{"Write to JSON", func() {}},
-		{"Read from JSON", func() {}},
-		{"Delete JSON", func() {}},
+		{"<--..", func() {}, true},
+		{"Create new JSON", func() {}, false},
+		{"Write to JSON", func() {}, false},
+		{"Read from JSON", func() {}, false},
+		{"Delete JSON", func() {}, false},
 	}}
 
 	xmlMenu = &Menu{Options: []Option{
-		{"<--..", func() {}},
-		{"Create new XML", func() {}},
-		{"Write to XML", func() {}},
-		{"Read from XML", func() {}},
-		{"Delete XML", func() {}},
+		{"<--..", func() {}, true},
+		{"Create new XML", func() {}, false},
+		{"Write to XML", func() {}, false},
+		{"Read from XML", func() {}, false},
+		{"Delete XML", func() {}, false},
 	}}
 
 	zipMenu = &Menu{Options: []Option{
-		{"<--..", func() {}},
-		{"Create new archive", func() {}},
-		{"Write to archive", func() {}},
-		{"Decompress archive", func() {}},
-		{"Delete archive", func() {}},
+		{"<--..", func() {}, true},
+		{"Create new archive", func() {}, false},
+		{"Write to archive", func() {}, false},
+		{"Decompress archive", func() {}, false},
+		{"Delete archive", func() {}, false},
 	}}
 }
 
@@ -116,14 +116,34 @@ func (l *Listener) Listen() error {
 
 type Object interface {
 	Render()
+	IsSelectable() bool
+}
+
+type Container interface {
+	Object
+}
+
+type Text struct {
+	Text string
+}
+
+func (t *Text) Render() {}
+
+func (t *Text) IsSelectable() bool {
+	return false
 }
 
 type Option struct {
-	Text string
-	Func func()
+	Text     string
+	Func     func()
+	Selected bool
 }
 
 func (o Option) Render() {}
+
+func (o Option) IsSelectable() bool {
+	return true
+}
 
 type Menu struct {
 	Func     func()
@@ -133,24 +153,25 @@ type Menu struct {
 
 func (m *Menu) Render() {
 	ansi.ClearScreen()
-	for i, op := range m.Options {
-		if i == m.Selected {
-			ansi.SetReversed(true)
-			defer ansi.SetReversed(false)
-		}
-		fmt.Printf("%s\n", op.Text)
+	for _, op := range m.Options {
+		op.Render()
+		fmt.Println()
 	}
 }
 
 func (m *Menu) Up() {
 	if m.Selected > 0 {
+		m.Options[m.Selected].Selected = false
 		m.Selected--
+		m.Options[m.Selected].Selected = true
 	}
 }
 
 func (m *Menu) Down() {
 	if m.Selected < len(m.Options)-1 {
+		m.Options[m.Selected].Selected = false
 		m.Selected++
+		m.Options[m.Selected].Selected = true
 	}
 }
 

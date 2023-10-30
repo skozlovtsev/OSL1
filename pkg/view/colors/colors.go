@@ -1,4 +1,4 @@
-package console
+package colors
 
 const (
 	RedText    = "\u001b[31m"
