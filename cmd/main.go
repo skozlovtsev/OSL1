@@ -1,9 +1,9 @@
 package main
 
 import (
-	"osl1/pkg/view/console"
+	view "osl1/pkg/view/console_rewo"
 )
 
 func main() {
-	panic(console.MainMenu())
+	view.MainLoop()
 }

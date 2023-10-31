@@ -8,10 +8,7 @@ require (
 )
 
 require (
-	github.com/bit101/go-ansi v1.4.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
-	github.com/mattn/go-tty v0.0.5 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 )
