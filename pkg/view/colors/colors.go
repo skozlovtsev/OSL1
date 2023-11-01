@@ -17,6 +17,6 @@ const (
 	Reversed  = "\u001b[7m" // Reversed selection
 
 	ResetColor  = "\u001b[0m"
-	ClearLine   = "\u001b[2K" // Clear entire line
-	ClearScreen = "\u001b[2J" // Clear entire screen
+	ClearLine   = "\u001b[2K"             // Clear entire line
+	ClearScreen = "\u001b[2J\u001b[1000D" // Clear entire screen and move cursor left by 1000 characters
 )
